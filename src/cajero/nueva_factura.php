@@ -14,6 +14,8 @@ if (!isset($_SESSION['factura'])) {
 $mostrar_boton_imprimir = false;
 $num_factura = null;
 
+
+
 // Manejo de las acciones del formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
