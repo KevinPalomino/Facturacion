@@ -1,0 +1,27 @@
+sistema_facturacion/
+│
+├── index.php              # Página de login
+├── dashboard.php          # Panel principal redirige según rol
+├── logout.php             # Cerrar sesión
+│
+├── global/                # Vistas del rol global
+│   └── usuarios.php
+│
+├── admin/                 # Vistas del rol administrador
+│   ├── informe_productos.php
+│   ├── informe_ventas.php
+│   └── informe_inventario.php
+│
+├── cajero/                # Vistas del cajero
+│   ├── nueva_factura.php
+│   ├── registrar_cliente.php
+│   └── cierre_caja.php
+│
+├── includes/              # Archivos comunes
+│   ├── db.php             # Conexión BD
+│   ├── header.php         # Encabezado común
+│   ├── footer.php         # Pie común
+│   └── auth.php           # Verifica sesión y rol
+│
+└── css/
+    └── estilos.css        # Estilos simples
