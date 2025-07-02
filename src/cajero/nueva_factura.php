@@ -107,26 +107,45 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
 ?>
 
 <h2>Nueva Factura</h2>
+
 <div class="factura-container">
     <form method="POST">
-        Cliente:
-        <select name="id_cliente" required>
-            <option value="">Seleccione</option>
+
+        <div style="margin-bottom: 15px;">
+            <label for="buscar_cliente">Buscar cliente (ID):</label><br>
+            <input type="text" id="buscar_cliente" name="buscar_cliente" placeholder="Ingrese el ID del cliente" autocomplete="off" style="width: 300px;">
+            <div id="sugerencias_cliente" style="border: 1px solid #ccc; display:none; position:absolute; background:#fff; z-index:1000; width:300px;"></div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="nombre_cliente">Nombre del cliente:</label><br>
+            <input type="text" id="nombre_cliente" name="nombre_cliente" readonly style="width: 300px; background-color: #f3f3f3;">
+        </div>
+
+        <!-- Select oculto pero funcional -->
+        <select name="id_cliente" id="id_cliente" style="display:none;" required>
             <?php while ($c = $clientes->fetch_assoc()): ?>
-                <option value="<?= $c['id_cliente'] ?>"><?= $c['nombre'] . ' ' . $c['apellido'] ?></option>
+                <option value="<?= $c['id_cliente'] ?>">
+                    <?= $c['nombre'] . ' ' . $c['apellido'] ?>
+                </option>
             <?php endwhile; ?>
         </select>
 
-        Método de Pago:
-        <select name="num_pago" required>
-            <option value="">Seleccione</option>
-            <?php while ($p = $pagos->fetch_assoc()): ?>
-                <option value="<?= $p['num_pago'] ?>"><?= $p['nombre'] ?></option>
-            <?php endwhile; ?>
-        </select>
+        <div style="margin-bottom: 15px;">
+            <label for="num_pago">Método de Pago:</label><br>
+            <select name="num_pago" required style="width: 300px;">
+                <option value="">Seleccione</option>
+                <?php while ($p = $pagos->fetch_assoc()): ?>
+                    <option value="<?= $p['num_pago'] ?>"><?= $p['nombre'] ?></option>
+                <?php endwhile; ?>
+            </select>
+        </div>
 
         <input type="submit" name="guardar_factura" value="Guardar Factura">
     </form>
+
+
+
 
     <h3>Agregar Producto</h3>
     <form method="POST">
@@ -178,4 +197,47 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
         <?php endforeach; ?>
     </table>
     <h3>Total: $<?= number_format($total, 2) ?></h3>
+
+
+
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#buscar_cliente').on('keyup', function() {
+            var query = $(this).val();
+            if (query.length > 0) {
+                $.ajax({
+                    url: '../includes/buscar_clientes.php',
+                    method: 'POST',
+                    data: {
+                        query: query
+                    },
+                    success: function(data) {
+                        $('#sugerencias_cliente').fadeIn();
+                        $('#sugerencias_cliente').html(data);
+                    }
+                });
+            } else {
+                $('#sugerencias_cliente').fadeOut();
+            }
+        });
+
+        // Al hacer clic en una sugerencia
+        // Al hacer clic en una sugerencia
+        $(document).on('click', '.cliente-sugerido', function() {
+            var id = $(this).data('id');
+            var nombre = $(this).text();
+
+            $('#buscar_cliente').val(id);
+            $('#sugerencias_cliente').fadeOut();
+
+            // Cambiar input de nombre visible
+            $('#nombre_cliente').val(nombre);
+
+            // Cambiar valor del <select> oculto
+            $('#id_cliente').val(id);
+        });
+    });
+</script>
