@@ -300,3 +300,77 @@ form p[style*="red"] {
 .sugerencias div:hover {
     background-color: #f0f0f0;
 }
+
+/* ===== Diseño interno mejorado para factura ===== */
+.factura-container form.cliente-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.factura-container .input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.factura-container .input-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.factura-container .input-group input[type="text"],
+.factura-container .input-group input[type="number"],
+.factura-container .input-group select {
+    padding: 10px;
+    border: 1px solid #ccd6dd;
+    border-radius: 6px;
+    background-color: #fdfdfd;
+    transition: border-color 0.2s;
+}
+
+.factura-container .input-group input:focus,
+.factura-container .input-group select:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.factura-container .buscar-wrapper {
+    position: relative;
+}
+
+.factura-container #sugerencias_cliente {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 99;
+}
+
+.factura-container #sugerencias_cliente div {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.factura-container #sugerencias_cliente div:hover {
+    background-color: #f0f0f0;
+}
+
+.factura-container .detalle-producto-form {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.factura-container .detalle-producto-form select,
+.factura-container .detalle-producto-form input {
+    flex: 1;
+    min-width: 180px;
+}

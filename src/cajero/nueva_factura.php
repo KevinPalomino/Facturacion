@@ -6,12 +6,18 @@ include "../includes/auth.php";
 include "../includes/header.php";
 verificarRol("CAJERO");
 
+// Inicializar la sesión de la factura si no existe
 if (!isset($_SESSION['factura'])) {
     $_SESSION['factura'] = [];
 }
 
+$mostrar_boton_imprimir = false;
+$num_factura = null;
+
+// Manejo de las acciones del formulario
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Agregar producto
+
+    // Agregar producto a la factura
     if (isset($_POST['agregar'])) {
         $id_producto = (int)$_POST['id_producto'];
         $cantidad = (int)$_POST['cantidad'];
@@ -33,13 +39,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Eliminar producto
+    // Eliminar producto de la factura
     if (isset($_POST['eliminar'])) {
         $id_producto = (int)$_POST['id_producto'];
         unset($_SESSION['factura'][$id_producto]);
     }
 
-    // Actualizar cantidad
+    // Actualizar cantidad de un producto en la factura
     if (isset($_POST['actualizar'])) {
         $id_producto = (int)$_POST['id_producto'];
         $cantidad = (int)$_POST['cantidad'];
@@ -49,13 +55,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Guardar factura
+    // Guardar la factura completa
     if (isset($_POST['guardar_factura'])) {
         $id_cliente = $_POST['id_cliente'];
         $num_pago = $_POST['num_pago'];
         $productos = $_SESSION['factura'];
 
-        // Validar stock
+        // Validar stock disponible
         foreach ($productos as $id_producto => $datos) {
             $cantidad = (int)$datos['cantidad'];
 
@@ -72,24 +78,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // Insertar factura
+        // Insertar la factura
         $stmt = $conn->prepare("INSERT INTO factura (id_cliente, fecha, num_pago) VALUES (?, NOW(), ?)");
         $stmt->bind_param("ii", $id_cliente, $num_pago);
         $stmt->execute();
         $num_factura = $stmt->insert_id;
         $stmt->close();
 
+        // Insertar detalles e impactar el stock
         foreach ($productos as $id_producto => $datos) {
             $cantidad = (int)$datos['cantidad'];
             $precio = (float)$datos['precio'];
 
-            // Insertar detalle
             $stmt = $conn->prepare("INSERT INTO detalle (id_factura, id_producto, cantidad, precio) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("iiid", $num_factura, $id_producto, $cantidad, $precio);
             $stmt->execute();
             $stmt->close();
 
-            // Actualizar stock
             $stmt = $conn->prepare("UPDATE producto SET stock = stock - ? WHERE id_producto = ?");
             $stmt->bind_param("ii", $cantidad, $id_producto);
             $stmt->execute();
@@ -98,31 +103,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $_SESSION['factura'] = [];
         echo "<p style='color:green'>Factura registrada correctamente.</p>";
+        $mostrar_boton_imprimir = true;
     }
 }
 
+// Consultas iniciales para formularios
 $clientes = $conn->query("SELECT id_cliente, nombre, apellido FROM cliente");
 $pagos = $conn->query("SELECT num_pago, nombre FROM modo_pago");
 $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM producto");
 ?>
 
 <h2>Nueva Factura</h2>
-
 <div class="factura-container">
-    <form method="POST">
-
-        <div style="margin-bottom: 15px;">
-            <label for="buscar_cliente">Buscar cliente (ID):</label><br>
-            <input type="text" id="buscar_cliente" name="buscar_cliente" placeholder="Ingrese el ID del cliente" autocomplete="off" style="width: 300px;">
-            <div id="sugerencias_cliente" style="border: 1px solid #ccc; display:none; position:absolute; background:#fff; z-index:1000; width:300px;"></div>
+    <form method="POST" class="cliente-form">
+        <div class="input-group buscar-wrapper">
+            <label for="buscar_cliente">Buscar cliente (ID):</label>
+            <input type="text" id="buscar_cliente" name="buscar_cliente" autocomplete="off" placeholder="Ej. 1020">
+            <div id="sugerencias_cliente" style="display:none;"></div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label for="nombre_cliente">Nombre del cliente:</label><br>
-            <input type="text" id="nombre_cliente" name="nombre_cliente" readonly style="width: 300px; background-color: #f3f3f3;">
+        <div class="input-group">
+            <label for="nombre_cliente">Nombre del cliente:</label>
+            <input type="text" id="nombre_cliente" name="nombre_cliente" readonly>
         </div>
 
-        <!-- Select oculto pero funcional -->
+        <div style="grid-column: 1 / -1;" class="input-group">
+            <label for="num_pago">Método de Pago:</label>
+            <select name="num_pago" required>
+                <option value="">Seleccione</option>
+                <?php while ($p = $pagos->fetch_assoc()): ?>
+                    <option value="<?= $p['num_pago'] ?>"><?= $p['nombre'] ?></option>
+                <?php endwhile; ?>
+            </select>
+        </div>
+
+        <!-- Campo oculto para el ID del cliente -->
         <select name="id_cliente" id="id_cliente" style="display:none;" required>
             <?php while ($c = $clientes->fetch_assoc()): ?>
                 <option value="<?= $c['id_cliente'] ?>">
@@ -131,22 +146,15 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
             <?php endwhile; ?>
         </select>
 
-        <div style="margin-bottom: 15px;">
-            <label for="num_pago">Método de Pago:</label><br>
-            <select name="num_pago" required style="width: 300px;">
-                <option value="">Seleccione</option>
-                <?php while ($p = $pagos->fetch_assoc()): ?>
-                    <option value="<?= $p['num_pago'] ?>"><?= $p['nombre'] ?></option>
-                <?php endwhile; ?>
-            </select>
+        <div style="grid-column: 1 / -1;">
+            <input type="submit" name="guardar_factura" value="Guardar Factura">
+            <?php if ($mostrar_boton_imprimir && $num_factura): ?>
+                <a href="imprimir_factura.php?id=<?= $num_factura ?>" target="_blank" class="btn" style="margin-top:15px; display:inline-block;">Imprimir Factura</a>
+            <?php endif; ?>
         </div>
-
-        <input type="submit" name="guardar_factura" value="Guardar Factura">
     </form>
 
-
-
-
+    <!-- Agregar productos -->
     <h3>Agregar Producto</h3>
     <form method="POST">
         <select name="id_producto" required>
@@ -161,6 +169,7 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
         <input type="submit" name="agregar" value="Agregar">
     </form>
 
+    <!-- Detalle de la factura -->
     <h3>Detalle Factura</h3>
     <table border="1" cellpadding="5">
         <tr>
@@ -197,11 +206,9 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
         <?php endforeach; ?>
     </table>
     <h3>Total: $<?= number_format($total, 2) ?></h3>
-
-
-
 </div>
 
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
@@ -224,19 +231,14 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
             }
         });
 
-        // Al hacer clic en una sugerencia
-        // Al hacer clic en una sugerencia
+        // Selección del cliente desde sugerencia
         $(document).on('click', '.cliente-sugerido', function() {
             var id = $(this).data('id');
             var nombre = $(this).text();
 
             $('#buscar_cliente').val(id);
             $('#sugerencias_cliente').fadeOut();
-
-            // Cambiar input de nombre visible
             $('#nombre_cliente').val(nombre);
-
-            // Cambiar valor del <select> oculto
             $('#id_cliente').val(id);
         });
     });

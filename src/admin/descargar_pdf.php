@@ -1,6 +1,6 @@
 <?php
 ob_start();
-require '../includes/ss/fpdf.php';
+require '../includes/fpdf/fpdf.php';
 require '../includes/db.php';
 
 $fecha = $_GET['fecha'] ?? '';
