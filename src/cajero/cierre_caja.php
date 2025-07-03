@@ -11,10 +11,9 @@ $limite = 10;
 $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $inicio = ($pagina - 1) * $limite;
 
-// Búsqueda (opcional por ID de cliente)
+// Búsqueda por cédula
 $busqueda = isset($_GET['buscar']) ? $conn->real_escape_string($_GET['buscar']) : '';
 $where = "WHERE DATE(f.fecha) = CURDATE()";
-
 if (!empty($busqueda)) {
     $where .= " AND c.id_cliente LIKE '%$busqueda%'";
 }
@@ -24,18 +23,47 @@ $total_query = $conn->query("SELECT COUNT(*) AS total FROM factura f JOIN client
 $total_resultado = $total_query->fetch_assoc()['total'];
 $total_paginas = ceil($total_resultado / $limite);
 
-// Consulta de facturas con límite
-$query = $conn->query("SELECT f.num_factura, f.fecha, c.nombre, c.apellido, m.nombre AS metodo_pago, (SELECT SUM(d.cantidad * d.precio) FROM detalle d WHERE d.id_factura = f.num_factura) AS total FROM factura f JOIN cliente c ON f.id_cliente = c.id_cliente JOIN modo_pago m ON f.num_pago = m.num_pago $where ORDER BY f.num_factura DESC LIMIT $inicio, $limite");
+// Consulta de facturas
+$query = $conn->query("
+    SELECT f.num_factura, f.fecha, c.nombre, c.apellido, m.nombre AS metodo_pago,
+    (SELECT SUM(d.cantidad * d.precio) FROM detalle d WHERE d.id_factura = f.num_factura) AS total
+    FROM factura f
+    JOIN cliente c ON f.id_cliente = c.id_cliente
+    JOIN modo_pago m ON f.num_pago = m.num_pago
+    $where
+    ORDER BY f.num_factura DESC
+    LIMIT $inicio, $limite
+");
+
+// Total recaudado del día
+$sql_total_hoy = "
+    SELECT SUM(d.cantidad * d.precio) AS total_recaudado
+    FROM factura f
+    JOIN detalle d ON f.num_factura = d.id_factura
+    WHERE DATE(f.fecha) = CURDATE()
+";
+$result_total_hoy = $conn->query($sql_total_hoy);
+$fila_total = $result_total_hoy->fetch_assoc();
+$total_recaudado_hoy = $fila_total['total_recaudado'] ?? 0;
 ?>
 
 <div class="content">
-    <h2>Cierre de Caja - <?php echo date('Y-m-d'); ?></h2>
+    <h2>Cierre de Caja - <?= date('Y-m-d') ?></h2>
 
-    <form method="GET" style="margin-bottom: 20px;">
-        <input type="text" name="buscar" placeholder="Buscar por ID de cliente" value="<?= htmlspecialchars($busqueda) ?>">
-        <button type="submit">Buscar</button>
-    </form>
+    <!-- Buscador con sugerencias y total del día -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;">
+        <form method="GET" id="form-busqueda">
+            <input type="hidden" name="buscar" id="buscar_hidden">
+            <input type="text" id="buscar_cliente" autocomplete="off" placeholder="Buscar cliente por cédula" value="<?= htmlspecialchars($busqueda) ?>">
+            <div id="sugerencias_cliente" style="position: absolute; background: white; border: 1px solid #ccc; z-index: 100; width: 100%; display: none;"></div>
+        </form>
 
+        <div style="background: #f0fff5; border-left: 5px solid #2ecc71; padding: 10px 15px; border-radius: 5px; font-weight: bold;">
+            💰 Total Día: $<?= number_format($total_recaudado_hoy, 2) ?>
+        </div>
+    </div>
+
+    <!-- Tabla de facturas -->
     <table>
         <thead>
             <tr>
@@ -65,6 +93,7 @@ $query = $conn->query("SELECT f.num_factura, f.fecha, c.nombre, c.apellido, m.no
         </tbody>
     </table>
 
+    <!-- Navegación -->
     <?php if ($total_paginas > 1): ?>
         <div style="margin-top:20px; text-align:center;">
             <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
@@ -75,3 +104,35 @@ $query = $conn->query("SELECT f.num_factura, f.fecha, c.nombre, c.apellido, m.no
         </div>
     <?php endif; ?>
 </div>
+
+<!-- Script de autocompletar -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#buscar_cliente').on('keyup', function() {
+            var query = $(this).val();
+            if (query.length > 0) {
+                $.ajax({
+                    url: '../includes/buscar_clientes.php',
+                    method: 'POST',
+                    data: {
+                        query: query
+                    },
+                    success: function(data) {
+                        $('#sugerencias_cliente').fadeIn().html(data);
+                    }
+                });
+            } else {
+                $('#sugerencias_cliente').fadeOut();
+            }
+        });
+
+        $(document).on('click', '.cliente-sugerido', function() {
+            var id = $(this).data('id');
+            $('#buscar_cliente').val(id);
+            $('#buscar_hidden').val(id);
+            $('#sugerencias_cliente').fadeOut();
+            $('#form-busqueda').submit();
+        });
+    });
+</script>

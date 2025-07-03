@@ -158,18 +158,68 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
 
     <!-- Agregar productos -->
     <h3>Agregar Producto</h3>
-    <form method="POST">
-        <select name="id_producto" required>
+    <form method="POST" id="form-producto">
+        <select name="id_producto" id="id_producto" required>
             <option value="">Seleccione producto</option>
-            <?php while ($pr = $productos->fetch_assoc()): ?>
-                <option value="<?= $pr['id_producto'] ?>">
-                    <?= $pr['nombre'] ?> (Stock: <?= $pr['stock'] ?>, Precio: $<?= $pr['precio'] ?>)
+            <?php while ($pr = $productos->fetch_assoc()):
+                $stock = $pr['stock'];
+                $limite_bajo = max(1, round($stock * 0.2));
+                $alerta = "";
+                $clase_alerta = "";
+
+                if ($stock == 0) {
+                    $alerta = "⚠ SIN STOCK";
+                    $clase_alerta = "sin-stock";
+                } elseif ($stock <= $limite_bajo) {
+                    $alerta = "⚠ STOCK BAJO";
+                    $clase_alerta = "stock-bajo";
+                }
+            ?>
+                <option
+                    value="<?= $pr['id_producto'] ?>"
+                    data-stock="<?= $stock ?>"
+                    class="<?= $clase_alerta ?>">
+                    <?= $pr['nombre'] ?> (Stock: <?= $stock ?>, $<?= $pr['precio'] ?>) <?= $alerta ?>
                 </option>
             <?php endwhile; ?>
         </select>
         Cantidad: <input type="number" name="cantidad" min="1" value="1" required>
         <input type="submit" name="agregar" value="Agregar">
     </form>
+
+    <!-- Estilos opcionales -->
+    <style>
+        .sin-stock {
+            color: red;
+            font-weight: bold;
+        }
+
+        .stock-bajo {
+            color: orange;
+        }
+    </style>
+
+    <!-- Script de validación -->
+    <script>
+        document.getElementById('form-producto').addEventListener('submit', function(e) {
+            const select = document.getElementById('id_producto');
+            const selectedOption = select.options[select.selectedIndex];
+            const stock = parseInt(selectedOption.getAttribute('data-stock'));
+
+            if (isNaN(stock)) return;
+
+            if (stock === 0) {
+                alert('❌ No puedes agregar este producto. No hay stock disponible.');
+                e.preventDefault();
+                return;
+            }
+
+            if (stock <= Math.max(1, Math.round(stock * 0.2))) {
+                alert('⚠ Advertencia: Este producto tiene stock bajo. Considere reabastecer pronto.');
+                // No evitamos agregar, solo advertimos
+            }
+        });
+    </script>
 
     <!-- Detalle de la factura -->
     <h3>Detalle Factura</h3>
