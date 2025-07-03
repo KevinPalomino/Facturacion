@@ -159,6 +159,13 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
     <!-- Agregar productos -->
     <h3>Agregar Producto</h3>
     <form method="POST" id="form-producto">
+        <!-- Buscador interactivo -->
+        <label for="buscar_producto">Buscar producto:</label>
+        <input type="text" id="buscar_producto" placeholder="Nombre o ID del producto" autocomplete="off">
+        <div id="sugerencias_producto" style="position:relative; background:white; border:1px solid #ccc; display:none; max-height:150px; overflow-y:auto;"></div>
+
+        <!-- Select con alertas -->
+        <label for="id_producto">Seleccionar producto:</label>
         <select name="id_producto" id="id_producto" required>
             <option value="">Seleccione producto</option>
             <?php while ($pr = $productos->fetch_assoc()):
@@ -177,15 +184,32 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
             ?>
                 <option
                     value="<?= $pr['id_producto'] ?>"
-                    data-stock="<?= $stock ?>"
+                    data-nombre="<?= $pr['nombre'] ?>"
                     class="<?= $clase_alerta ?>">
                     <?= $pr['nombre'] ?> (Stock: <?= $stock ?>, $<?= $pr['precio'] ?>) <?= $alerta ?>
                 </option>
             <?php endwhile; ?>
         </select>
-        Cantidad: <input type="number" name="cantidad" min="1" value="1" required>
+
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" name="cantidad" min="1" value="1" required>
+
         <input type="submit" name="agregar" value="Agregar">
     </form>
+
+    <!-- STYLE IN CODE, TOCA BORRARLO -->
+    <style>
+        .sin-stock {
+            color: red;
+            font-weight: bold;
+        }
+
+        .stock-bajo {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+
 
     <!-- Estilos opcionales -->
     <style>
@@ -198,7 +222,7 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
             color: orange;
         }
     </style>
-
+    <!-- STYLE IN CODE, TOCA BORRARLO -->
     <!-- Script de validación -->
     <script>
         document.getElementById('form-producto').addEventListener('submit', function(e) {
@@ -292,6 +316,45 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
             $('#sugerencias_cliente').fadeOut();
             $('#nombre_cliente').val(nombre);
             $('#id_cliente').val(id);
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#buscar_producto').on('keyup', function() {
+            const query = $(this).val();
+            if (query.length > 0) {
+                $.ajax({
+                    url: '../includes/buscar_productos.php',
+                    method: 'POST',
+                    data: {
+                        query: query
+                    },
+                    success: function(data) {
+                        $('#sugerencias_producto').fadeIn().html(data);
+                    }
+                });
+            } else {
+                $('#sugerencias_producto').fadeOut();
+            }
+        });
+
+        // Al hacer clic en una sugerencia
+        $(document).on('click', '.producto-sugerido', function() {
+            const id = $(this).data('id');
+            const nombre = $(this).data('nombre');
+
+            $('#buscar_producto').val(nombre);
+            $('#id_producto').val(id);
+            $('#sugerencias_producto').fadeOut();
+        });
+
+        // Ocultar sugerencias si haces clic fuera
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#buscar_producto, #sugerencias_producto').length) {
+                $('#sugerencias_producto').fadeOut();
+            }
         });
     });
 </script>
