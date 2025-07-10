@@ -1,0 +1,17 @@
+Credenciales para acceder al sistema.
+-------------------------------------
+Administrador:
+
+user: admin@gmail.com
+password: 123456789
+-------------------------------------
+Cajero:
+
+User: cajero@gmail.com
+password: 123456789
+-------------------------------------
+Global:
+
+User: kevinpalomino.jolianis@gmail.com
+password: 123456789
+-------------------------------------
