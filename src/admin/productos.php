@@ -1,8 +1,10 @@
 <?php
+session_start();
+include "../includes/auth.php";       // ✅ PRIMERO incluyes donde está definida la función
+verificarRol("ADMINISTRADOR");       // ✅ Luego ya puedes llamarla
 include "../includes/db.php";
-include "../includes/auth.php";
 include "../includes/header.php";
-verificarRol("ADMINISTRADOR");
+
 
 $accion = $_GET['accion'] ?? 'listar';
 $productoEditar = null;

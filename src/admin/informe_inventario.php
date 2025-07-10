@@ -1,8 +1,11 @@
 <?php
-include "../includes/header.php";
-include "../includes/db.php";
+session_start();
 include "../includes/auth.php";
 verificarRol("ADMINISTRADOR");
+include "../includes/header.php";
+include "../includes/db.php";
+
+
 
 $sql = "SELECT id_producto, nombre, precio, stock FROM producto ORDER BY id_producto";
 $resultado = $conn->query($sql);

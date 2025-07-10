@@ -1,10 +1,10 @@
 <?php
 // cierre_caja.php — Resumen de ventas del día con paginación y buscador por ID de cliente
 session_start();
-include "../includes/db.php";
 include "../includes/auth.php";
-include "../includes/header.php";
 verificarRol("CAJERO");
+include "../includes/db.php";
+include "../includes/header.php";
 
 // Parámetros de paginación
 $limite = 10;

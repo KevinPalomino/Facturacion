@@ -1,8 +1,8 @@
 <?php
-include "../includes/db.php";
 include "../includes/auth.php";
-include "../includes/header.php";
 verificarRol("CAJERO");
+include "../includes/db.php";
+include "../includes/header.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_cliente = $_POST["id_cliente"]; // Cedula

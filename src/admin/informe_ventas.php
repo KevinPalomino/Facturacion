@@ -1,8 +1,11 @@
 <?php
-include "../includes/header.php";
-include "../includes/db.php";
+session_start();
 include "../includes/auth.php";
 verificarRol("ADMINISTRADOR");
+include "../includes/header.php";
+include "../includes/db.php";
+
+
 
 // Agrupar ventas por fecha (día)
 $sql = "SELECT DATE(f.fecha) AS fecha, SUM(d.cantidad * d.precio) AS total_dia
@@ -13,6 +16,8 @@ $sql = "SELECT DATE(f.fecha) AS fecha, SUM(d.cantidad * d.precio) AS total_dia
 
 $result = $conn->query($sql);
 ?>
+
+
 <h2>Informe de Ventas</h2>
 
 <table border="1" cellpadding="5">

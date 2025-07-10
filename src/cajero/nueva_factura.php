@@ -1,10 +1,11 @@
 <?php
 // nueva_factura.php
 session_start();
-include "../includes/db.php";
 include "../includes/auth.php";
-include "../includes/header.php";
 verificarRol("CAJERO");
+include "../includes/db.php";
+include "../includes/header.php";
+
 
 // Inicializar la sesión de la factura si no existe
 if (!isset($_SESSION['factura'])) {
