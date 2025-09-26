@@ -35,6 +35,7 @@ $rol = strtolower(trim($_SESSION['rol'])); // Normaliza el rol
                 <a href="../admin/informe_inventario.php">Informe Inventario</a>
                 <a href="../admin/informe_ventas.php">Informe Ventas</a>
                 <a href="../admin/productos.php">Productos</a>
+                <a href="../admin/lista_creditos.php">Gestión de Créditos</a>
 
             <?php elseif ($rol === 'global'): ?>
                 <a href="../global/usuarios.php">Gestión de Usuarios</a>

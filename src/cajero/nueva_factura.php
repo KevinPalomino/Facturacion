@@ -64,6 +64,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $num_pago = $_POST['num_pago'];
         $productos = $_SESSION['factura'];
 
+        // Obtener información del método de pago
+        $stmt = $conn->prepare("SELECT nombre FROM modo_pago WHERE num_pago = ?");
+        $stmt->bind_param("i", $num_pago);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $modo_pago = $result->fetch_assoc();
+        $es_credito = strtolower($modo_pago['nombre']) === 'Credito';
+
         // Validar stock disponible
         foreach ($productos as $id_producto => $datos) {
             $cantidad = (int)$datos['cantidad'];
@@ -87,6 +95,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $num_factura = $stmt->insert_id;
         $stmt->close();
+
+        // Si es crédito, crear el registro de crédito y las cuotas
+        if ($es_credito) {
+            // Calcular el total de la factura
+            $monto_total = 0;
+            foreach ($productos as $datos) {
+                $monto_total += $datos['precio'] * $datos['cantidad'];
+            }
+
+            // Obtener información del crédito del formulario
+            $plazo_meses = $_POST['plazo_meses'];
+            $tipo_pago = $_POST['tipo_pago'];
+            $tasa_interes = $tipo_pago == 'bimensual' ? 0.01 : 0.02;
+
+            // Insertar el crédito
+            $stmt = $conn->prepare("INSERT INTO creditos (id_cliente, monto_total, plazo_meses, tipo_pago, fecha_inicio, estado) VALUES (?, ?, ?, ?, NOW(), 'activo')");
+            $stmt->bind_param("idis", $id_cliente, $monto_total, $plazo_meses, $tipo_pago);
+            $stmt->execute();
+            $id_credito = $stmt->insert_id;
+
+            // Calcular e insertar las cuotas
+            $monto_cuota_capital = $monto_total / $plazo_meses;
+            $intervalo = $tipo_pago == 'bimensual' ? 2 : 1;
+
+            for ($i = 1; $i <= $plazo_meses; $i++) {
+                $fecha_vencimiento = date('Y-m-d', strtotime("+ " . ($i * $intervalo) . " months"));
+                $monto_interes = $monto_total * $tasa_interes;
+
+                $stmt = $conn->prepare("INSERT INTO cuotas (id_credito, numero_cuota, monto_capital, monto_interes, fecha_vencimiento, estado) VALUES (?, ?, ?, ?, ?, 'pendiente')");
+                $stmt->bind_param("iidds", $id_credito, $i, $monto_cuota_capital, $monto_interes, $fecha_vencimiento);
+                $stmt->execute();
+            }
+        }
 
         // Insertar detalles e impactar el stock
         foreach ($productos as $id_producto => $datos) {
@@ -117,6 +158,9 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
 ?>
 
 <h2>Nueva Factura</h2>
+<!-- Incluir script de crédito -->
+<script src="../js/credito.js"></script>
+
 <div class="factura-container">
     <form method="POST" class="cliente-form">
         <div class="input-group buscar-wrapper">
@@ -132,12 +176,46 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
 
         <div style="grid-column: 1 / -1;" class="input-group">
             <label for="num_pago">Método de Pago:</label>
-            <select name="num_pago" required>
+            <select name="num_pago" id="metodo_pago" required onchange="mostrarOpcionesCredito()">
                 <option value="">Seleccione</option>
                 <?php while ($p = $pagos->fetch_assoc()): ?>
-                    <option value="<?= $p['num_pago'] ?>"><?= $p['nombre'] ?></option>
+                    <?php $esCredito = (strtolower(trim($p['nombre'])) === 'credito'); ?>
+                    <option value="<?= $p['num_pago'] ?>" 
+                            data-es-credito="<?= $esCredito ? 'true' : 'false' ?>">
+                        <?= $p['nombre'] ?>
+                    </option>
                 <?php endwhile; ?>
             </select>
+        </div>
+
+        <div id="opciones_credito" style="display: none; grid-column: 1 / -1;" class="input-group">
+            <div style="display: flex; gap: 20px; margin-top: 15px;">
+                <div style="flex: 1;">
+                    <label for="plazo_meses">Plazo en meses:</label>
+                    <select name="plazo_meses" id="plazo_meses" class="form-control" onchange="actualizarInfoCredito()">
+                        <?php for ($i = 3; $i <= 10; $i++): ?>
+                            <option value="<?= $i ?>"><?= $i ?> meses</option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label for="tipo_pago">Tipo de pago:</label>
+                    <select name="tipo_pago" id="tipo_pago" class="form-control" onchange="actualizarInfoCredito()">
+                        <option value="mensual">Mensual (2% interés)</option>
+                        <option value="bimensual">Bimensual (1% interés)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="info_credito" style="display: none; grid-column: 1 / -1; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h4>Información del Crédito</h4>
+            <div class="credito-detalles">
+                <p><strong>Monto total:</strong> <span id="monto_total">$0.00</span></p>
+                <p><strong>Valor cuota:</strong> <span id="valor_cuota">$0.00</span></p>
+                <p><strong>Interés por cuota:</strong> <span id="interes_cuota">$0.00</span></p>
+                <p><strong>Total a pagar:</strong> <span id="total_pagar">$0.00</span></p>
+            </div>
         </div>
 
         <!-- Campo oculto para el ID del cliente -->
