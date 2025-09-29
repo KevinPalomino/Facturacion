@@ -1,5 +1,6 @@
 // Chatbot OpenRouter API integration
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY =
+  "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";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODEL = "x-ai/grok-4-fast:free";
 
@@ -30,17 +31,21 @@ async function sendMessage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "HTTP-Referer": window.location.origin,
-        "X-Title": "Sistema de Facturación"
+        "X-Title": "Sistema de Facturación",
       },
       body: JSON.stringify({
         model: OPENROUTER_MODEL,
         messages: [
-          { role: "system", content: "Eres un asistente virtual para ayudar a los usuarios del sistema de facturación." },
-          { role: "user", content: text }
-        ]
-      })
+          {
+            role: "system",
+            content:
+              "Eres un asistente virtual para ayudar a los usuarios del sistema de facturación.",
+          },
+          { role: "user", content: text },
+        ],
+      }),
     });
     const data = await res.json();
     const botMsg = data?.choices?.[0]?.message?.content || "No response.";
