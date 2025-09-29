@@ -15,8 +15,11 @@ $rol = strtolower(trim($_SESSION['rol'])); // Normaliza el rol
     <meta charset="UTF-8">
     <title>Sistema de Facturación</title>
     <link rel="stylesheet" href="../css/estilos.css"> <!-- ✅ Enlace al CSS global -->
-    <link rel="stylesheet" href="../css/asistente.css"> <!-- CSS del asistente -->
-    <script src="../js/asistente.js" defer></script>
+
+    <!-- Chatbot Gemini -->
+    <link rel="stylesheet" href="../css/chatbot.css">
+    <script src="../js/chatbot.js"></script>
+
 </head>
 
 <body>
@@ -25,7 +28,7 @@ $rol = strtolower(trim($_SESSION['rol'])); // Normaliza el rol
             <strong class="welcome">
                 Bienvenido: <?php echo htmlspecialchars($_SESSION['correo']); ?> (<?php echo ucfirst($rol); ?>)
             </strong>
-            <button id="open-assistant" class="btn assistant">Asistente</button>
+
             <a class="btn logout" href="../logout.php">Cerrar sesión</a>
         </div>
         <nav class="main-nav">
@@ -48,17 +51,4 @@ $rol = strtolower(trim($_SESSION['rol'])); // Normaliza el rol
         </nav>
     </header>
 
-    <!-- Chat Assistant -->
-    <div id="chat-container" class="chat-container hidden">
-        <div class="chat-header">
-            <h3>Conta Assistant</h3>
-            <button id="close-assistant" class="close-btn">&times;</button>
-        </div>
-        <div id="chat-messages" class="chat-messages"></div>
-        <div class="chat-input-container">
-            <input type="text" id="chat-input" placeholder="Escribe tu pregunta aquí...">
-            <button id="send-message">Enviar</button>
-        </div>
-    </div>
-
-    <main class="content">
+    <main class="main-content">
