@@ -89,7 +89,7 @@ if ($accion === 'listar') {
                 <td>{$row['stock']}</td>
                 <td>" . htmlspecialchars($row['categoria']) . "</td>
                 <td>
-                    <a href='productos.php?accion=editar&id={$row['id_producto']}'>✏️ Editar</a> |
+                                            <a href='productos.php?accion=editar&id={$row['id_producto']}'>✏️ Editar</a> |
                     <a href='productos.php?accion=eliminar&id={$row['id_producto']}' onclick='return confirm(\"¿Eliminar este producto?\")'>🗑️ Eliminar</a>
                 </td>
               </tr>";
