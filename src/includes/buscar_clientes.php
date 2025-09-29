@@ -13,6 +13,6 @@ if (isset($_POST['query'])) {
                 '</div>';
         }
     } else {
-    echo '<div style="padding:5px;">Cliente no encontrado. <a href="../cajero/registrar_cliente.php">Registrar</a></div>';
+        echo '<div style="padding:5px;">Cliente no encontrado. <a href="../cajero/registrar_cliente.php">Registrar</a></div>';
     }
 }

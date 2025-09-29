@@ -20,7 +20,11 @@ $creditos = $conn->query($query);
 
 <div class="container mt-4">
     <h2>Lista de Créditos</h2>
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
             <thead class="table-dark">
@@ -42,6 +46,7 @@ $creditos = $conn->query($query);
                         <td><?= ucfirst($credito['tipo_pago']) ?></td>
                         <td>
                             <div class="progress">
+<<<<<<< HEAD
                                 <?php
                                 $porcentaje = ($credito['total_cuotas'] > 0)
                                     ? ($credito['cuotas_pagadas'] / $credito['total_cuotas']) * 100
@@ -52,6 +57,18 @@ $creditos = $conn->query($query);
                                     aria-valuenow="<?= $porcentaje ?>"
                                     aria-valuemin="0"
                                     aria-valuemax="100">
+=======
+                                <?php 
+                                $porcentaje = ($credito['total_cuotas'] > 0) 
+                                    ? ($credito['cuotas_pagadas'] / $credito['total_cuotas']) * 100 
+                                    : 0;
+                                ?>
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: <?= $porcentaje ?>%"
+                                     aria-valuenow="<?= $porcentaje ?>" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
                                     <?= $credito['cuotas_pagadas'] ?>/<?= $credito['total_cuotas'] ?>
                                 </div>
                             </div>
@@ -70,8 +87,13 @@ $creditos = $conn->query($query);
                         </td>
                         <td><?= date('d/m/Y', strtotime($credito['fecha_inicio'])) ?></td>
                         <td>
+<<<<<<< HEAD
                             <a href="ver_credito.php?id=<?= $credito['id_credito'] ?>"
                                 class="btn btn-info btn-sm">Ver Detalles</a>
+=======
+                            <a href="ver_credito.php?id=<?= $credito['id_credito'] ?>" 
+                               class="btn btn-info btn-sm">Ver Detalles</a>
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
                         </td>
                     </tr>
                 <?php endwhile; ?>

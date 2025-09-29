@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Función para formatear números con formato colombiano (1.790.000,00)
 function formatearNumero(numero) {
     // Asegurarse de que sea un número
@@ -53,14 +54,20 @@ function parsearNumeroFormateado(texto) {
     }
 }
 
+=======
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
 // Función para calcular el total de la factura actual
 function calcularTotalFactura() {
     const h3Total = document.querySelector('.factura-container h3:last-of-type');
     if (h3Total) {
         const totalText = h3Total.textContent;
+<<<<<<< HEAD
         const total = parsearNumeroFormateado(totalText);
         console.log('Total texto:', totalText, 'Total calculado:', total);
         return total;
+=======
+        return parseFloat(totalText.replace('Total: $', '').replace(',', '')) || 0;
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
     }
     return 0;
 }
@@ -92,6 +99,7 @@ function actualizarInfoCredito() {
     const infoCredito = document.getElementById('info_credito');
     
     if (totalFactura > 0 && plazoSelect && tipoSelect) {
+<<<<<<< HEAD
         const plazoMeses = parseInt(plazoSelect.value);
         const esBimensual = tipoSelect.value === 'bimensual';
         const tasaInteres = esBimensual ? 0.01 : 0.02;
@@ -111,6 +119,22 @@ function actualizarInfoCredito() {
         // Guardar los valores sin formato para cálculos posteriores
         document.getElementById('monto_total').dataset.valor = totalFactura;
         document.getElementById('valor_cuota').dataset.valor = totalPorCuota;
+=======
+        const plazo = parseInt(plazoSelect.value);
+        const esBimensual = tipoSelect.value === 'bimensual';
+        const tasaInteres = esBimensual ? 0.01 : 0.02;
+        
+        const montoInteresPorCuota = totalFactura * tasaInteres;
+        const montoCuotaCapital = totalFactura / plazo;
+        const totalPorCuota = montoCuotaCapital + montoInteresPorCuota;
+        const totalAPagar = totalPorCuota * plazo;
+        
+        // Actualizar la información en pantalla
+        document.getElementById('monto_total').textContent = `$${totalFactura.toFixed(2)}`;
+        document.getElementById('valor_cuota').textContent = `$${totalPorCuota.toFixed(2)}`;
+        document.getElementById('interes_cuota').textContent = `$${montoInteresPorCuota.toFixed(2)} (${(tasaInteres * 100)}%)`;
+        document.getElementById('total_pagar').textContent = `$${totalAPagar.toFixed(2)}`;
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
         
         infoCredito.style.display = 'block';
     }
@@ -129,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.subtotal').forEach(function(element) {
         observer.observe(element, { childList: true });
     });
+<<<<<<< HEAD
 });
 
 // Agregar event listeners cuando el DOM esté listo
@@ -194,3 +219,6 @@ function calcularCuotas() {
         document.getElementById('cuota_inicial').value = formatearNumero(cuotaInicial);
     }
 }
+=======
+});
+>>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
