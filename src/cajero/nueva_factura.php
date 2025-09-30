@@ -326,52 +326,52 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
                 </tbody>
             </table>
         </div>
-            <div id="opciones_credito" style="display: none; grid-column: 1 / -1;" class="input-group">
-                <div style="display: flex; gap: 20px; margin-top: 15px;">
-                    <div style="flex: 1;">
-                        <label for="plazo_meses">Plazo en meses:</label>
-                        <select name="plazo_meses" id="plazo_meses" class="form-control" onchange="actualizarInfoCredito()">
-                            <?php for ($i = 3; $i <= 10; $i++): ?>
-                                <option value="<?= $i ?>"><?= $i ?> meses</option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <label for="tipo_pago">Tipo de pago:</label>
-                        <select name="tipo_pago" id="tipo_pago" class="form-control" onchange="actualizarInfoCredito()">
-                            <option value="mensual">Mensual (2% interés)</option>
-                            <option value="bimensual">Bimensual (1% interés)</option>
-                        </select>
-                    </div>
+        <div id="opciones_credito" style="display: none; grid-column: 1 / -1;" class="input-group">
+            <div style="display: flex; gap: 20px; margin-top: 15px;">
+                <div style="flex: 1;">
+                    <label for="plazo_meses">Plazo en meses:</label>
+                    <select name="plazo_meses" id="plazo_meses" class="form-control" onchange="actualizarInfoCredito()">
+                        <?php for ($i = 3; $i <= 10; $i++): ?>
+                            <option value="<?= $i ?>"><?= $i ?> meses</option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label for="tipo_pago">Tipo de pago:</label>
+                    <select name="tipo_pago" id="tipo_pago" class="form-control" onchange="actualizarInfoCredito()">
+                        <option value="mensual">Mensual (2% interés)</option>
+                        <option value="bimensual">Bimensual (1% interés)</option>
+                    </select>
                 </div>
             </div>
+        </div>
 
-            <div id="info_credito" style="display: none; grid-column: 1 / -1; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-                <h4>Información del Crédito</h4>
-                <div class="credito-detalles">
-                    <p><strong>Monto total:</strong> <span id="monto_total">$0.00</span></p>
-                    <p><strong>Valor cuota:</strong> <span id="valor_cuota">$0.00</span></p>
-                    <p><strong>Interés por cuota:</strong> <span id="interes_cuota">$0.00</span></p>
-                    <p><strong>Total a pagar:</strong> <span id="total_pagar">$0.00</span></p>
-                </div>
+        <div id="info_credito" style="display: none; grid-column: 1 / -1; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h4>Información del Crédito</h4>
+            <div class="credito-detalles">
+                <p><strong>Monto total:</strong> <span id="monto_total">$0.00</span></p>
+                <p><strong>Valor cuota:</strong> <span id="valor_cuota">$0.00</span></p>
+                <p><strong>Interés por cuota:</strong> <span id="interes_cuota">$0.00</span></p>
+                <p><strong>Total a pagar:</strong> <span id="total_pagar">$0.00</span></p>
             </div>
+        </div>
 
-            <!-- Campo oculto para el ID del cliente -->
-            <select name="id_cliente" id="id_cliente" style="display:none;" required>
-                <?php while ($c = $clientes->fetch_assoc()): ?>
-                    <option value="<?= $c['id_cliente'] ?>">
-                        <?= $c['nombre'] . ' ' . $c['apellido'] ?>
-                    </option>
-                <?php endwhile; ?>
-            </select>
+        <!-- Campo oculto para el ID del cliente -->
+        <select name="id_cliente" id="id_cliente" style="display:none;" required>
+            <?php while ($c = $clientes->fetch_assoc()): ?>
+                <option value="<?= $c['id_cliente'] ?>">
+                    <?= $c['nombre'] . ' ' . $c['apellido'] ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
 
-            <div style="grid-column: 1 / -1;">
-                <input type="submit" name="guardar_factura" value="Guardar Factura">
-                <?php if ($mostrar_boton_imprimir && $num_factura): ?>
-                    <a href="imprimir_factura.php?id=<?= $num_factura ?>" target="_blank" class="btn" style="margin-top:15px; display:inline-block;">Imprimir Factura</a>
-                <?php endif; ?>
-            </div>
-            <h3>Total: $<?= number_format($total, 2, ',', '.') ?></h3>
+        <div style="grid-column: 1 / -1;">
+            <input type="submit" name="guardar_factura" value="Guardar Factura">
+            <?php if ($mostrar_boton_imprimir && $num_factura): ?>
+                <a href="imprimir_factura.php?id=<?= $num_factura ?>" target="_blank" class="btn" style="margin-top:15px; display:inline-block;">Imprimir Factura</a>
+            <?php endif; ?>
+        </div>
+        <h3>Total: $<?= number_format($total, 2, ',', '.') ?></h3>
     </div>
 
     <!-- SECCIÓN 3: CLIENTE Y MÉTODO DE PAGO -->

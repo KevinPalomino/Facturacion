@@ -48,35 +48,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $res = $stmt->get_result();
         $credito = $res->fetch_assoc();
 
-    // Obtener datos actualizados de la cuota pagada
-    $stmt = $conn->prepare("SELECT numero_cuota, monto_capital, monto_interes, estado, fecha_pago FROM cuotas WHERE id_cuota = ?");
-    $stmt->bind_param("i", $id_cuota);
-    $stmt->execute();
-    $res_cuota = $stmt->get_result();
-    $cuota_actualizada = $res_cuota->fetch_assoc();
+        // Obtener datos actualizados de la cuota pagada
+        $stmt = $conn->prepare("SELECT numero_cuota, monto_capital, monto_interes, estado, fecha_pago FROM cuotas WHERE id_cuota = ?");
+        $stmt->bind_param("i", $id_cuota);
+        $stmt->execute();
+        $res_cuota = $stmt->get_result();
+        $cuota_actualizada = $res_cuota->fetch_assoc();
 
-    $tirilla = new FPDF();
-    $tirilla->AddPage();
-    $tirilla->SetFont('Arial','B',15);
-    $tirilla->Cell(0,12,'Tirilla de Pago de Cuota',0,1,'C');
-    $tirilla->SetFont('Arial','',12);
-    $tirilla->Cell(0,8,'Cliente: ' . $credito['nombre'] . ' ' . $credito['apellido'],0,1);
-    $tirilla->Cell(0,8,'Credito ID: ' . $credito['id_credito'],0,1);
-    $tirilla->Cell(0,8,'Cuota No: ' . $cuota_actualizada['numero_cuota'],0,1);
-    $tirilla->Cell(0,8,'Valor Pagado: $' . number_format($cuota_actualizada['monto_capital'] + $cuota_actualizada['monto_interes'],2),0,1);
-    $tirilla->Cell(0,8,'Monto Capital: $' . number_format($cuota_actualizada['monto_capital'],2),0,1);
-    $tirilla->Cell(0,8,'Monto Interes: $' . number_format($cuota_actualizada['monto_interes'],2),0,1);
-    $tirilla->Cell(0,8,'Metodo de Pago: ' . $metodo_pago,0,1);
-    $tirilla->Cell(0,8,'Fecha de Pago: ' . ($cuota_actualizada['fecha_pago'] ? date('d/m/Y', strtotime($cuota_actualizada['fecha_pago'])) : date('d/m/Y')),0,1);
-    $tirilla->Cell(0,8,'Hora de Pago: ' . date('H:i:s'),0,1);
-    // Calcular valor restante
-    $stmt = $conn->prepare("SELECT SUM(monto_capital + monto_interes) as restante FROM cuotas WHERE id_credito = ? AND estado != 'pagado'");
-    $stmt->bind_param("i", $id_credito);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $restante = $res->fetch_assoc();
-    $tirilla->Cell(0,8,'Valor Restante: $' . number_format($restante['restante'],2),0,1);
-    $tirilla->Cell(0,8,'Usuario: ' . (isset($_SESSION['correo']) ? $_SESSION['correo'] : 'N/A'),0,1);
+        $tirilla = new FPDF();
+        $tirilla->AddPage();
+        $tirilla->SetFont('Arial', 'B', 15);
+        $tirilla->Cell(0, 12, 'Tirilla de Pago de Cuota', 0, 1, 'C');
+        $tirilla->SetFont('Arial', '', 12);
+        $tirilla->Cell(0, 8, 'Cliente: ' . $credito['nombre'] . ' ' . $credito['apellido'], 0, 1);
+        $tirilla->Cell(0, 8, 'Credito ID: ' . $credito['id_credito'], 0, 1);
+        $tirilla->Cell(0, 8, 'Cuota No: ' . $cuota_actualizada['numero_cuota'], 0, 1);
+        $tirilla->Cell(0, 8, 'Valor Pagado: $' . number_format($cuota_actualizada['monto_capital'] + $cuota_actualizada['monto_interes'], 2), 0, 1);
+        $tirilla->Cell(0, 8, 'Monto Capital: $' . number_format($cuota_actualizada['monto_capital'], 2), 0, 1);
+        $tirilla->Cell(0, 8, 'Monto Interes: $' . number_format($cuota_actualizada['monto_interes'], 2), 0, 1);
+        $tirilla->Cell(0, 8, 'Metodo de Pago: ' . $metodo_pago, 0, 1);
+        $tirilla->Cell(0, 8, 'Fecha de Pago: ' . ($cuota_actualizada['fecha_pago'] ? date('d/m/Y', strtotime($cuota_actualizada['fecha_pago'])) : date('d/m/Y')), 0, 1);
+        $tirilla->Cell(0, 8, 'Hora de Pago: ' . date('H:i:s'), 0, 1);
+        // Calcular valor restante
+        $stmt = $conn->prepare("SELECT SUM(monto_capital + monto_interes) as restante FROM cuotas WHERE id_credito = ? AND estado != 'pagado'");
+        $stmt->bind_param("i", $id_credito);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $restante = $res->fetch_assoc();
+        $tirilla->Cell(0, 8, 'Valor Restante: $' . number_format($restante['restante'], 2), 0, 1);
+        $tirilla->Cell(0, 8, 'Usuario: ' . (isset($_SESSION['correo']) ? $_SESSION['correo'] : 'N/A'), 0, 1);
         $tirilla_dir = realpath(__DIR__ . '/../tirillas');
         if (!$tirilla_dir) {
             mkdir(__DIR__ . '/../tirillas', 0777, true);
@@ -105,4 +105,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: ver_credito.php?id=" . $id_credito);
     exit();
 }
-?>
