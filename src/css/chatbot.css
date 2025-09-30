@@ -24,7 +24,6 @@
   bottom: 100px;
   width: 340px;
   max-width: 95vw;
-  max-height: 70vh;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.18);
@@ -49,13 +48,16 @@
   font-size: 20px;
   cursor: pointer;
 }
+/* Limita el alto del área de mensajes y agrega scroll */
 #chatbot-messages {
   flex: 1;
   padding: 16px;
   overflow-y: auto;
   font-size: 15px;
   background: #f7f7f7;
-  max-height: 45vh;
+  max-height: 320px;
+  min-height: 120px;
+  box-sizing: border-box;
 }
 .chatbot-msg {
   margin-bottom: 12px;
