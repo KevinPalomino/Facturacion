@@ -73,13 +73,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Depuración del método de pago
         $nombre_modo_pago = trim($modo_pago['nombre']);
-        echo "<pre>Método de pago seleccionado: ID=" . $modo_pago['num_pago'] . ", Nombre='" . htmlspecialchars($nombre_modo_pago) . "'</pre>";
-
         $es_credito = (strtolower($nombre_modo_pago) === 'credito');
-        echo "<pre>¿Es crédito? " . ($es_credito ? 'Sí' : 'No') . "</pre>";
-
         if ($es_credito && $modo_pago['num_pago'] != 7) {
-            echo "<pre style='color:red'>ERROR: El ID del método de pago crédito no coincide. Esperado: 7, Recibido: " . $modo_pago['num_pago'] . "</pre>";
             exit();
         }
 
@@ -109,13 +104,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Si es crédito, crear el registro de crédito y las cuotas
         if ($es_credito) {
-            echo "<pre>Creando crédito...</pre>";
             // Calcular el total de la factura
             $monto_total = 0;
             foreach ($productos as $datos) {
                 $monto_total += $datos['precio'] * $datos['cantidad'];
             }
-            echo "<pre>Monto total calculado: $" . number_format($monto_total, 2) . "</pre>";
 
             // Obtener información del crédito del formulario
             $plazo_meses = $_POST['plazo_meses'];
@@ -127,12 +120,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("idis", $id_cliente, $monto_total, $plazo_meses, $tipo_pago);
 
             if (!$stmt->execute()) {
-                echo "<pre>Error al insertar crédito: " . $stmt->error . "</pre>";
                 exit();
             }
 
             $id_credito = $stmt->insert_id;
-            echo "<pre>Crédito insertado con ID: " . $id_credito . "</pre>";
 
             // Calcular e insertar las cuotas
             $num_cuotas = $tipo_pago == 'bimensual' ? ($plazo_meses * 2) : $plazo_meses;
@@ -335,18 +326,6 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
                 </tbody>
             </table>
         </div>
-        <<<<<<< HEAD
-            <div class="tabla-navegacion">
-            <div class="tabla-paginacion">
-                <button id="btnAnterior" disabled>&laquo; Anterior</button>
-                <span id="paginaActual">Página 1</span>
-                <button id="btnSiguiente">Siguiente &raquo;</button>
-            </div>
-            <div class="tabla-info">
-                <span id="infoRegistros">Mostrando 0-0 de 0 productos</span>
-            </div>
-            =======
-
             <div id="opciones_credito" style="display: none; grid-column: 1 / -1;" class="input-group">
                 <div style="display: flex; gap: 20px; margin-top: 15px;">
                     <div style="flex: 1;">
@@ -391,7 +370,6 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
                 <?php if ($mostrar_boton_imprimir && $num_factura): ?>
                     <a href="imprimir_factura.php?id=<?= $num_factura ?>" target="_blank" class="btn" style="margin-top:15px; display:inline-block;">Imprimir Factura</a>
                 <?php endif; ?>
-                >>>>>>> 471d79da792632c704b480a72f1b69e2c8d76d77
             </div>
             <h3>Total: $<?= number_format($total, 2, ',', '.') ?></h3>
     </div>
