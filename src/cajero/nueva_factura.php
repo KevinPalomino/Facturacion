@@ -239,15 +239,26 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
 <!-- Incluir script de crédito -->
 <script src="../js/credito.js"></script>
 <script>
-// Solución robusta para mostrar opciones de crédito
-document.addEventListener('DOMContentLoaded', function() {
-    var metodoPago = document.getElementById('metodo_pago');
-    var opcionesCredito = document.getElementById('opciones_credito');
-    var infoCredito = document.getElementById('info_credito');
-    if (metodoPago) {
-        metodoPago.addEventListener('change', function() {
+    // Solución robusta para mostrar opciones de crédito
+    document.addEventListener('DOMContentLoaded', function() {
+        var metodoPago = document.getElementById('metodo_pago');
+        var opcionesCredito = document.getElementById('opciones_credito');
+        var infoCredito = document.getElementById('info_credito');
+        if (metodoPago) {
+            metodoPago.addEventListener('change', function() {
+                var selected = metodoPago.options[metodoPago.selectedIndex];
+                // Detecta por atributo o por texto
+                var esCredito = (selected.getAttribute('data-es-credito') === 'true') || selected.textContent.toLowerCase().includes('credito');
+                if (esCredito) {
+                    opcionesCredito.style.display = 'block';
+                    infoCredito.style.display = 'block';
+                } else {
+                    opcionesCredito.style.display = 'none';
+                    infoCredito.style.display = 'none';
+                }
+            });
+            // Ejecutar al cargar por si ya está seleccionado crédito
             var selected = metodoPago.options[metodoPago.selectedIndex];
-            // Detecta por atributo o por texto
             var esCredito = (selected.getAttribute('data-es-credito') === 'true') || selected.textContent.toLowerCase().includes('credito');
             if (esCredito) {
                 opcionesCredito.style.display = 'block';
@@ -256,19 +267,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 opcionesCredito.style.display = 'none';
                 infoCredito.style.display = 'none';
             }
-        });
-        // Ejecutar al cargar por si ya está seleccionado crédito
-        var selected = metodoPago.options[metodoPago.selectedIndex];
-        var esCredito = (selected.getAttribute('data-es-credito') === 'true') || selected.textContent.toLowerCase().includes('credito');
-        if (esCredito) {
-            opcionesCredito.style.display = 'block';
-            infoCredito.style.display = 'block';
-        } else {
-            opcionesCredito.style.display = 'none';
-            infoCredito.style.display = 'none';
         }
-    }
-});
+    });
 </script>
 
 <div class="factura-container">

@@ -76,7 +76,10 @@ function mostrarOpcionesCredito() {
   if (select && select.tagName === "SELECT") {
     const option = select.options[select.selectedIndex];
     // Detecta por atributo o por texto
-    esCredito = (option && (option.getAttribute("data-es-credito") === "true" || option.text.toLowerCase().includes("credito")));
+    esCredito =
+      option &&
+      (option.getAttribute("data-es-credito") === "true" ||
+        option.text.toLowerCase().includes("credito"));
   }
 
   if (esCredito) {
