@@ -1,6 +1,6 @@
 // Chatbot OpenRouter integration
 const OPENROUTER_API_KEY =
-  "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";
+  "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";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 function showChatbot() {

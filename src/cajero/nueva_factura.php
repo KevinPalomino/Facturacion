@@ -238,6 +238,38 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
 <h2>Nueva Factura</h2>
 <!-- Incluir script de crédito -->
 <script src="../js/credito.js"></script>
+<script>
+// Solución robusta para mostrar opciones de crédito
+document.addEventListener('DOMContentLoaded', function() {
+    var metodoPago = document.getElementById('metodo_pago');
+    var opcionesCredito = document.getElementById('opciones_credito');
+    var infoCredito = document.getElementById('info_credito');
+    if (metodoPago) {
+        metodoPago.addEventListener('change', function() {
+            var selected = metodoPago.options[metodoPago.selectedIndex];
+            // Detecta por atributo o por texto
+            var esCredito = (selected.getAttribute('data-es-credito') === 'true') || selected.textContent.toLowerCase().includes('credito');
+            if (esCredito) {
+                opcionesCredito.style.display = 'block';
+                infoCredito.style.display = 'block';
+            } else {
+                opcionesCredito.style.display = 'none';
+                infoCredito.style.display = 'none';
+            }
+        });
+        // Ejecutar al cargar por si ya está seleccionado crédito
+        var selected = metodoPago.options[metodoPago.selectedIndex];
+        var esCredito = (selected.getAttribute('data-es-credito') === 'true') || selected.textContent.toLowerCase().includes('credito');
+        if (esCredito) {
+            opcionesCredito.style.display = 'block';
+            infoCredito.style.display = 'block';
+        } else {
+            opcionesCredito.style.display = 'none';
+            infoCredito.style.display = 'none';
+        }
+    }
+});
+</script>
 
 <div class="factura-container">
     <!-- SECCIÓN 1: AGREGAR PRODUCTOS -->
@@ -326,35 +358,7 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
                 </tbody>
             </table>
         </div>
-        <div id="opciones_credito" style="display: none; grid-column: 1 / -1;" class="input-group">
-            <div style="display: flex; gap: 20px; margin-top: 15px;">
-                <div style="flex: 1;">
-                    <label for="plazo_meses">Plazo en meses:</label>
-                    <select name="plazo_meses" id="plazo_meses" class="form-control" onchange="actualizarInfoCredito()">
-                        <?php for ($i = 3; $i <= 10; $i++): ?>
-                            <option value="<?= $i ?>"><?= $i ?> meses</option>
-                        <?php endfor; ?>
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label for="tipo_pago">Tipo de pago:</label>
-                    <select name="tipo_pago" id="tipo_pago" class="form-control" onchange="actualizarInfoCredito()">
-                        <option value="mensual">Mensual (2% interés)</option>
-                        <option value="bimensual">Bimensual (1% interés)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div id="info_credito" style="display: none; grid-column: 1 / -1; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-            <h4>Información del Crédito</h4>
-            <div class="credito-detalles">
-                <p><strong>Monto total:</strong> <span id="monto_total">$0.00</span></p>
-                <p><strong>Valor cuota:</strong> <span id="valor_cuota">$0.00</span></p>
-                <p><strong>Interés por cuota:</strong> <span id="interes_cuota">$0.00</span></p>
-                <p><strong>Total a pagar:</strong> <span id="total_pagar">$0.00</span></p>
-            </div>
-        </div>
+        <!-- Eliminado el bloque duplicado de opciones_credito/info_credito en la sección de productos -->
 
         <!-- Campo oculto para el ID del cliente -->
         <select name="id_cliente" id="id_cliente" style="display:none;" required>
@@ -364,14 +368,6 @@ $productos = $conn->query("SELECT id_producto, nombre, precio, stock FROM produc
                 </option>
             <?php endwhile; ?>
         </select>
-
-        <div style="grid-column: 1 / -1;">
-            <input type="submit" name="guardar_factura" value="Guardar Factura">
-            <?php if ($mostrar_boton_imprimir && $num_factura): ?>
-                <a href="imprimir_factura.php?id=<?= $num_factura ?>" target="_blank" class="btn" style="margin-top:15px; display:inline-block;">Imprimir Factura</a>
-            <?php endif; ?>
-        </div>
-        <h3>Total: $<?= number_format($total, 2, ',', '.') ?></h3>
     </div>
 
     <!-- SECCIÓN 3: CLIENTE Y MÉTODO DE PAGO -->
